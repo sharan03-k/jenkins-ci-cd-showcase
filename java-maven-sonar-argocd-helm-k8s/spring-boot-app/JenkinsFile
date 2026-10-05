@@ -19,21 +19,28 @@ pipeline {
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
       }
     }
+stage('Build Application') {
+    steps {
+        dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
+            sh '''
+                JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn clean package
+            '''
+        }
+    }
+}
 stage('Build & Sonar Analysis') {
     environment {
         SONAR_URL = "http://13.48.178.34:9000"
+        JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
+        PATH      = "/usr/lib/jvm/java-21-openjdk-amd64/bin:${env.PATH}"
     }
     steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                 sh '''
-                    # Force JAVA_HOME directly inline for every Maven invocation
-                    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn -v
-
-                    # Build package
+                    # Force JAVA_HOME inline for both commands
                     JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn clean package
 
-                    # Execute SonarQube analysis
                     JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn sonar:sonar \
                       -Dsonar.host.url=${SONAR_URL} \
                       -Dsonar.login=${SONAR_AUTH_TOKEN}
