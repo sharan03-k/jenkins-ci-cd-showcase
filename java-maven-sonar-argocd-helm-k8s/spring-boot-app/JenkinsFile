@@ -27,18 +27,16 @@ pipeline {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                 sh '''
-                    # Unset any forced system JAVA_HOME set by /etc/mavenrc
-                    unset JAVA_HOME
-                    
-                    # Force JAVA_HOME and PATH explicitly for this execution
+                    # Force Maven launcher to use the Java 21 executable directly
                     export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-                    export PATH=/usr/lib/jvm/java-21-openjdk-amd64/bin:$PATH
+                    export JAVACMD=/usr/lib/jvm/java-21-openjdk-amd64/bin/java
+                    export PATH=$JAVA_HOME/bin:$PATH
 
-                    # Verify Maven output
-                    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn -v
+                    # Verify Maven picks up Java 21
+                    /usr/share/maven/bin/mvn -v
 
-                    # Run SonarQube with forced Java 21 runtime
-                    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn sonar:sonar \
+                    # Execute SonarQube analysis
+                    /usr/share/maven/bin/mvn sonar:sonar \
                       -Dsonar.host.url=${SONAR_URL} \
                       -Dsonar.login=${SONAR_AUTH_TOKEN}
                 '''
