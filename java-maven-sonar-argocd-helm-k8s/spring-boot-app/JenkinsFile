@@ -19,7 +19,7 @@ pipeline {
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
       }
     }
-    stage('Static Code Analysis') {
+   stage('Static Code Analysis') {
     environment {
         SONAR_URL = "http://13.48.178.34:9000"
     }
@@ -27,13 +27,15 @@ pipeline {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                 sh '''
-                    # Explicitly set JAVA_HOME to Java 21
-                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                    # Dynamically find the real JAVA_HOME path from system default 'java'
+                    REAL_JAVA=$(readlink -f $(which java))
+                    export JAVA_HOME=$(dirname $(dirname $REAL_JAVA))
                     export PATH=$JAVA_HOME/bin:$PATH
-                    
-                    # Print Java & Maven version to verify
+
+                    # Verify Maven detects Java 21
                     mvn -v
-                    
+
+                    # Run SonarQube analysis
                     mvn sonar:sonar \
                       -Dsonar.host.url=${SONAR_URL} \
                       -Dsonar.login=${SONAR_AUTH_TOKEN}
