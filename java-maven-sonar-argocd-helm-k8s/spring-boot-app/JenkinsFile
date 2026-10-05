@@ -9,7 +9,7 @@ pipeline {
     stage('Checkout') {
       steps {
         sh 'echo passed'
-        //git branch: 'main', url: 'https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero.git'
+        //git branch: 'main', url: 'https://github.com/sharan03-k/Jenkins-ci-cd-showcase'
       }
     }
     stage('Build and Test') {
@@ -20,11 +20,13 @@ pipeline {
       }
     }
 stage('Build Application') {
+    environment {
+        JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
+        PATH      = "/usr/lib/jvm/java-21-openjdk-amd64/bin:${env.PATH}"
+    }
     steps {
         dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
-            sh '''
-                JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn clean package
-            '''
+            sh 'mvn clean package'
         }
     }
 }
