@@ -23,19 +23,19 @@ stage('Build & Sonar Analysis') {
     environment {
         SONAR_URL = "http://13.48.178.34:9000"
         JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
-        PATH = "/usr/lib/jvm/java-21-openjdk-amd64/bin:${env.PATH}"
+        PATH      = "/usr/lib/jvm/java-21-openjdk-amd64/bin:${env.PATH}"
     }
     steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                 sh '''
-                    # Verify Java version
+                    # 1. Verify Maven uses Java 21
                     mvn -v
 
-                    # Build artifact
+                    # 2. Build application package
                     mvn clean package
 
-                    # Run SonarQube analysis
+                    # 3. Execute SonarQube analysis
                     mvn sonar:sonar \
                       -Dsonar.host.url=${SONAR_URL} \
                       -Dsonar.login=${SONAR_AUTH_TOKEN}
