@@ -19,7 +19,7 @@ pipeline {
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
       }
     }
-  stage('Static Code Analysis') {
+ stage('Static Code Analysis') {
     environment {
         SONAR_URL = "http://13.48.178.34:9000"
     }
@@ -27,11 +27,11 @@ pipeline {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                 sh '''
-                    # 1. Clear any inherited JAVA_HOME
-                    unset JAVA_HOME
+                    # Verify environment picked up by Jenkins runner
+                    mvn -v
 
-                    # 2. Run Maven explicitly passing Java 21 executable
-                    /usr/share/maven/bin/mvn -Djava.home=/usr/lib/jvm/java-21-openjdk-amd64 sonar:sonar \
+                    # Run SonarQube analysis
+                    mvn sonar:sonar \
                       -Dsonar.host.url=${SONAR_URL} \
                       -Dsonar.login=${SONAR_AUTH_TOKEN}
                 '''
