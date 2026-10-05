@@ -29,13 +29,13 @@ stage('Build & Sonar Analysis') {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                 sh '''
-                    # 1. Verify Maven uses Java 21
+                    # Verify Maven picks up Java 21
                     mvn -v
 
-                    # 2. Build application package
+                    # Build the application package
                     mvn clean package
 
-                    # 3. Execute SonarQube analysis
+                    # Run SonarQube analysis
                     mvn sonar:sonar \
                       -Dsonar.host.url=${SONAR_URL} \
                       -Dsonar.login=${SONAR_AUTH_TOKEN}
