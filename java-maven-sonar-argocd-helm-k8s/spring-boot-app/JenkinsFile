@@ -32,7 +32,7 @@ stage('Build Application') {
 }
 stage('Build & Sonar Analysis') {
     tools {
-        jdk 'Java 21'
+        jdk 'JAVA 21'
     }
     environment {
         SONAR_URL = "http://13.48.178.34:9000"
