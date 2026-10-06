@@ -39,13 +39,16 @@ stage('Build & Sonar Analysis') {
     steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
             dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
-                sh '''
-                    # Force JAVA_HOME inline for both commands
-                    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn clean package
+                sh '''#!/bin/bash
+                    # Explicitly export JAVA_HOME so subshells inherit it
+                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                    export PATH=/usr/lib/jvm/java-21-openjdk-amd64/bin:$PATH
 
-                    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 mvn sonar:sonar \
-                      -Dsonar.host.url=${SONAR_URL} \
-                      -Dsonar.login=${SONAR_AUTH_TOKEN}
+                    mvn clean package
+
+                    mvn sonar:sonar \
+                      -Dsonar.host.url="${SONAR_URL}" \
+                      -Dsonar.login="${SONAR_AUTH_TOKEN}"
                 '''
             }
         }
