@@ -38,12 +38,22 @@ pipeline {
         maven 'M3'
     }
 
+   pipeline {
+    agent any
+
+    tools {
+        jdk 'JAVA 21'
+    }
+
     stages {
         stage('Build & Sonar Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
                     dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
-                        sh '''
+                        sh '''#!/bin/bash
+                            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                            export PATH=$JAVA_HOME/bin:$PATH
+
                             mvn clean package
 
                             mvn sonar:sonar \
